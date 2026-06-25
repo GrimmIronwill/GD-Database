@@ -241,6 +241,18 @@ func _rebuild_key_editor() -> void:
 				_k_enum.add_item("(no enum values)")
 			_k_enum.item_selected.connect(func(idx): _current_key = idx)
 			_key_host.add_child(_k_enum)
+		DBFieldDef.FieldType.RESOURCE_REF:
+			_k_line = LineEdit.new()
+			_k_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_k_line.placeholder_text = "res://…"
+			_k_line.text_changed.connect(func(t): _current_key = t)
+			_key_host.add_child(_k_line)
+
+			var browse := Button.new()
+			browse.text = "Browse…"
+			browse.tooltip_text = "Choose resource key"
+			browse.pressed.connect(_on_browse_key_resource)
+			_key_host.add_child(browse)
 		_:
 			_k_line = LineEdit.new()
 			_k_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -253,13 +265,21 @@ func _write_key_editor(v: Variant) -> void:
 	match _key_type():
 		DBFieldDef.FieldType.INT, DBFieldDef.FieldType.FLOAT:
 			if _k_spin: _k_spin.set_value_no_signal(float(_current_key))
+
 		DBFieldDef.FieldType.BOOL:
 			if _k_check: _k_check.set_pressed_no_signal(bool(_current_key))
+
 		DBFieldDef.FieldType.ENUM:
 			if _k_enum and _k_enum.item_count > 0:
 				_k_enum.selected = clampi(int(_current_key), 0, _k_enum.item_count - 1)
+
+		DBFieldDef.FieldType.STRING, DBFieldDef.FieldType.RESOURCE_REF:
+			if _k_line:
+				_k_line.text = str(_current_key)
+
 		_:
-			if _k_line: _k_line.text = str(_current_key)
+			if _k_line:
+				_k_line.text = str(_current_key)
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Value editor
@@ -475,6 +495,34 @@ func _on_browse_resource() -> void:
 		if _v_line: _v_line.text = path
 		_close_child_dialog()
 	)
+	dlg.canceled.connect(_close_child_dialog)
+
+func _on_browse_key_resource() -> void:
+	_close_child_dialog()
+
+	var dlg := EditorFileDialog.new()
+	dlg.access = EditorFileDialog.ACCESS_RESOURCES
+	dlg.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
+
+	# Сейчас resource_type_hint общий для поля.
+	# Если он задан, используем его и для ключа Resource Ref.
+	if _field_def and not _field_def.resource_type_hint.is_empty():
+		dlg.add_filter("*.*", _field_def.resource_type_hint)
+	else:
+		dlg.add_filter("*.*", "All Resources")
+		dlg.add_filter("*.tres,*.res,*.tscn,*.gd", "Godot Resources")
+
+	add_child(dlg)
+	_child_dialog = dlg
+	dlg.popup_centered(Vector2i(800, 550))
+
+	dlg.file_selected.connect(func(path: String) -> void:
+		_current_key = path
+		if _k_line:
+			_k_line.text = path
+		_close_child_dialog()
+	)
+
 	dlg.canceled.connect(_close_child_dialog)
 
 func _on_edit_array_value() -> void:

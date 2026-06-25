@@ -322,7 +322,13 @@ func _update_type_sections() -> void:
 	_array_type_opt.get_meta("section").visible     = is_array
 	_dict_key_type_opt.get_meta("section").visible  = dict_like
 	_nested_schema_edit.get_meta("section").visible = (t == DBFieldDef.FieldType.NESTED_OBJECT) or is_dict or elem_is_nested
-	_resource_hint_edit.get_meta("section").visible = (t == DBFieldDef.FieldType.RESOURCE_REF)
+	var uses_resource_ref := t == DBFieldDef.FieldType.RESOURCE_REF \
+		or (is_array and elem_type == DBFieldDef.FieldType.RESOURCE_REF) \
+		or (dict_like and _dict_key_type_opt.selected == DBFieldDef.FieldType.RESOURCE_REF) \
+		or (dict_like and _dict_value_type_opt.selected == DBFieldDef.FieldType.RESOURCE_REF)
+
+	_resource_hint_edit.get_meta("section").visible = uses_resource_ref
+
 
 	_dict_key_enum_box.visible = dict_key_is_enum
 
