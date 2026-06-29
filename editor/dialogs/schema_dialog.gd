@@ -6,11 +6,12 @@ class_name SchemaDialog
 const FieldDialog = preload("res://addons/gd_database/editor/dialogs/field_dialog.gd")
 
 signal schema_created(result: Array)    # [DBSchema, table_name]
-signal schema_changed
+signal schema_changed(result: Array) # [old_table_name, new_table_name]
 
 var _database: DBDatabase = null
 var _schema: DBSchema = null
 var _is_new: bool = false
+var _editing_table_name: String = ""
 
 var _name_edit: LineEdit
 var _table_name_edit: LineEdit
@@ -114,13 +115,18 @@ func _build_ui() -> void:
 
 # ──────────────────────────────────────────────────────────────────────────────
 
-func open(schema: DBSchema, db: DBDatabase) -> void:
+func open(schema: DBSchema, db: DBDatabase, table_name: String = "") -> void:
 	_schema   = schema
 	_database = db
 	_is_new   = false
-	_name_edit.text       = schema.schema_name
-	_table_name_edit.text = schema.schema_name
-	_desc_edit.text       = schema.description
+	_editing_table_name = table_name
+
+	_name_edit.text = schema.schema_name
+
+	# Важно: имя таблицы не равно имени схемы.
+	_table_name_edit.text = table_name if not table_name.is_empty() else schema.schema_name
+
+	_desc_edit.text = schema.description
 	_refresh_field_list()
 	popup_centered()
 
@@ -136,11 +142,28 @@ func open_new(db: DBDatabase) -> void:
 
 func _refresh_field_list() -> void:
 	_field_list.clear()
-	if _schema == null: return
+	if _schema == null:
+		return
+
 	for f: DBFieldDef in _schema.fields:
 		var req := " *" if f.required else ""
-		_field_list.add_item("%s : %s%s" % [f.field_name, f.get_type_label(), req])
-		_field_list.set_item_metadata(_field_list.item_count - 1, f.field_name)
+
+		var text := "%s : %s%s" % [
+			f.field_name,
+			f.get_type_label(),
+			req
+		]
+
+		if not f.description.strip_edges().is_empty():
+			text += " — " + f.description.strip_edges()
+
+		_field_list.add_item(text)
+
+		var idx := _field_list.item_count - 1
+		_field_list.set_item_metadata(idx, f.field_name)
+
+		if not f.description.strip_edges().is_empty():
+			_field_list.set_item_tooltip(idx, f.description.strip_edges())
 
 func _on_add_field() -> void:
 	_field_dialog.set_context(_database, _name_edit.text.strip_edges())
@@ -181,12 +204,18 @@ func _move_field(delta: int) -> void:
 func _on_ok() -> void:
 	_schema.schema_name = _name_edit.text.strip_edges()
 	_schema.description = _desc_edit.text.strip_edges()
+
 	var tname := _table_name_edit.text.strip_edges()
+	if tname.is_empty():
+		push_warning("[GD Database] Table name cannot be empty.")
+		return
+
 	hide()
+
 	if _is_new:
 		schema_created.emit([_schema, tname])
 	else:
-		schema_changed.emit()
+		schema_changed.emit([_editing_table_name, tname])
 
 func _lbl(text: String) -> Label:
 	var l := Label.new()

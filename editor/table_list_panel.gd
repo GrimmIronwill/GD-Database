@@ -112,10 +112,33 @@ func _open_schema_for_selected() -> void:
 	var name: String = _item_list.get_item_metadata(idxs[0])
 	var t := _database.get_table(name)
 	if t and t.schema:
-		_schema_dialog.open(t.schema, _database)
+		_schema_dialog.open(t.schema, _database, name)
 		var result = await _schema_dialog.schema_changed
-		refresh(_database)
-		table_selected.emit(name)
+		if result == null:
+			return
+
+		var old_name: String = result[0]
+		var new_name: String = result[1]
+
+		if new_name != old_name:
+			if _database.has_table(new_name):
+				push_warning("[GD Database] Table '%s' already exists." % new_name)
+				refresh(_database, old_name)
+				table_selected.emit(old_name)
+				return
+
+			if not _database.rename_table(old_name, new_name):
+				push_warning("[GD Database] Failed to rename table '%s' to '%s'." % [old_name, new_name])
+				refresh(_database, old_name)
+				table_selected.emit(old_name)
+				return
+
+			refresh(_database, new_name)
+			table_selected.emit(new_name)
+		else:
+			refresh(_database, old_name)
+			table_selected.emit(old_name)
+
 
 func _on_add_table() -> void:
 	if _database == null: return

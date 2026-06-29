@@ -297,6 +297,8 @@ func _rebuild_tree() -> void:
 	for i: int in range(fields.size()):
 		var f: DBFieldDef = fields[i]
 		var title := f.field_name
+		if not f.description.strip_edges().is_empty():
+			title += " ⓘ"
 		if _sort_field == f.field_name:
 			title += " " + ("▲" if _sort_asc else "▼")
 		_tree.set_column_title(i + 1, title)
@@ -339,6 +341,10 @@ func _populate_row(item: TreeItem, entry: DBEntry,
 	for i: int in range(fields.size()):
 		var col := i + 1
 		var f: DBFieldDef = fields[i]
+
+		if not f.description.strip_edges().is_empty():
+			item.set_tooltip_text(col, f.description.strip_edges())
+
 		var val: Variant = entry.get_value(f.field_name)
 		if val == null:
 			val = f.get_default()
