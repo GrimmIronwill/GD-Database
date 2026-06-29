@@ -1,6 +1,6 @@
 @tool
 extends Window
-## Popup for adding or editing a single DBFieldDef.
+## Всплывающее окно для добавления или редактирования DBFieldDef.
 
 signal field_confirmed(field: DBFieldDef)
 
@@ -70,13 +70,13 @@ func _build_ui() -> void:
 	grid.add_theme_constant_override("v_separation", 6)
 	vbox.add_child(grid)
 
-	# Field name
+	# Имя поля
 	grid.add_child(_lbl("Field Name *"))
 	_name_edit = LineEdit.new()
 	_name_edit.placeholder_text = "e.g. hp, attack_name"
 	grid.add_child(_name_edit)
 
-	# Type
+	# Тип
 	grid.add_child(_lbl("Data Type *"))
 	_type_opt = OptionButton.new()
 	for t in TYPE_LABELS:
@@ -84,26 +84,26 @@ func _build_ui() -> void:
 	_type_opt.item_selected.connect(_on_type_changed)
 	grid.add_child(_type_opt)
 
-	# Default value
+	# Значение по умолчанию
 	grid.add_child(_lbl("Default Value"))
 	_default_edit = LineEdit.new()
 	_default_edit.placeholder_text = "leave empty for type default"
 	grid.add_child(_default_edit)
 
-	# Required
+	# Обязательное
 	grid.add_child(_lbl("Required"))
 	_required_check = CheckBox.new()
 	_required_check.text = ""
 	grid.add_child(_required_check)
 
-	# Description
+	# Описание
 	grid.add_child(_lbl("Description"))
 	_desc_edit = LineEdit.new()
 	grid.add_child(_desc_edit)
 
 	vbox.add_child(HSeparator.new())
 
-	# ── Type-specific sections ─────────────────────────────────────────────────
+	# ── Секции для конкретных типов ────────────────────────────────────────────
 	_enum_section = VBoxContainer.new()
 	vbox.add_child(_enum_section)
 
@@ -219,7 +219,7 @@ func _build_ui() -> void:
 	dict_section.hide()
 	_dict_key_type_opt.set_meta("section", dict_section)
 
-	# Store section refs on type_opt metadata for visibility toggling
+	# Сохраняем ссылки на секции в метаданных type_opt для переключения видимости
 	_type_opt.set_meta("enum_sect",   _enum_section)
 	_type_opt.set_meta("arr_sect",    _array_type_opt.get_meta("section"))
 	_type_opt.set_meta("nest_sect",   _nested_schema_edit.get_meta("section"))
@@ -228,7 +228,7 @@ func _build_ui() -> void:
 
 	vbox.add_child(HSeparator.new())
 
-	# ── Buttons ────────────────────────────────────────────────────────────────
+	# ── Кнопки ──────────────────────────────────────────────────────────────────
 	var btn_row := HBoxContainer.new()
 	vbox.add_child(btn_row)
 	var sp := Control.new(); sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -353,13 +353,13 @@ func _on_ok() -> void:
 	if field_is_dict_like and _field.dict_key_type == DBFieldDef.FieldType.ENUM:
 		if _dict_key_enum_mode_opt.selected == 1:
 			var kref := _selected_dict_key_enum_ref()
-			_field.dict_key_enum_ref = kref          # FIX: запоминаем ссылку
+			_field.dict_key_enum_ref = kref          # ИСПРАВЛЕНИЕ: запоминаем ссылку
 			if _database and not kref.is_empty():
 				_field.dict_key_enum_values = _database.get_enum_values_for_ref(kref)
 			else:
 				_field.dict_key_enum_values = PackedStringArray()
 		else:
-			_field.dict_key_enum_ref = ""            # FIX: inline → ссылки нет
+			_field.dict_key_enum_ref = ""            # ИСПРАВЛЕНИЕ: inline → ссылки нет
 			_field.dict_key_enum_values = PackedStringArray(_dict_key_enum_edit.text.split(",", false))
 	else:
 		_field.dict_key_enum_ref = ""                # FIX

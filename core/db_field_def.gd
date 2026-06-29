@@ -2,7 +2,7 @@
 class_name DBFieldDef
 extends Resource
 
-## Enumerates every data type a column can hold.
+## Перечисляет все типы данных, которые может содержать колонка.
 enum FieldType {
 	INT,            ## 0
 	FLOAT,          ## 1
@@ -15,29 +15,29 @@ enum FieldType {
 	RESOURCE_REF,   ## 8
 	ARRAY,          ## 9
 	NESTED_OBJECT,  ## 10
-	DICTIONARY      ## 11 – key→value map (key=dict_key_type, value=dict_value_type)
+	DICTIONARY      ## 11 – отображение ключ→значение (key=dict_key_type, value=dict_value_type)
 }
 
 @export var field_name: String = "field"
 @export var field_type: FieldType = FieldType.STRING
-@export var default_value: Variant = null      # serialised as Variant
+@export var default_value: Variant = null      # сериализуется как Variant
 @export var required: bool = false
 @export var description: String = ""
 
-# ── ENUM specific ──────────────────────────────────────────────────────────────
+# ── ENUM ───────────────────────────────────────────────────────────────────────
 @export var enum_values: PackedStringArray = PackedStringArray()
 ## Если не пусто и тип ENUM — значения берутся из другого поля.
 ## Формат ключа: "SchemaName/field_name". enum_values при этом кэшируется.
 @export var enum_ref: String = ""
 
-# ── ARRAY specific ─────────────────────────────────────────────────────────────
+# ── ARRAY ──────────────────────────────────────────────────────────────────────
 @export var array_element_type: FieldType = FieldType.STRING
 
-# ── NESTED_OBJECT / RESOURCE_REF specific ─────────────────────────────────────
-@export var nested_schema_name: String = ""   # schema that validates the nested object
-@export var resource_type_hint: String = ""   # e.g. "Texture2D"
+# ── NESTED_OBJECT / RESOURCE_REF ───────────────────────────────────────────────
+@export var nested_schema_name: String = ""   # схема для валидации вложенного объекта
+@export var resource_type_hint: String = ""   # напр. "Texture2D"
 
-# ── DICTIONARY specific ───────────────────────────────────────────────────────
+# ── DICTIONARY ─────────────────────────────────────────────────────────────────
 @export var dict_key_type: FieldType = FieldType.STRING
 @export var dict_value_type: FieldType = FieldType.STRING
 ## enum-значения для КЛЮЧА, когда dict_key_type == ENUM.
@@ -84,7 +84,7 @@ func _element_type_label() -> String:
 	temp.field_type = array_element_type
 	return temp.get_type_label()
 
-## Returns a proper zero-value for this field type.
+## Возвращает нулевое значение для данного типа поля.
 func get_default() -> Variant:
 	if default_value != null:
 		return default_value
@@ -103,7 +103,7 @@ func get_default() -> Variant:
 		FieldType.DICTIONARY:    return {}
 	return null
 
-## Coerce a raw Variant to the correct type for this field.
+## Приводит сырой Variant к правильному типу для этого поля.
 func coerce(value: Variant) -> Variant:
 	match field_type:
 		FieldType.INT:           return int(value) if value != null else 0

@@ -1,7 +1,7 @@
 @tool
 extends VBoxContainer
 class_name EntryTableView
-## Spreadsheet grid. Uses a Tree in table mode.
+## Табличная сетка. Использует Tree в табличном режиме.
 
 signal data_changed
 
@@ -18,23 +18,23 @@ var _filter_val_edit: LineEdit
 var _tree: Tree
 var _status_label: Label
 
-# Dialogs
+# Диалоги
 var _array_dialog: Window
 var _dict_dialog: Window
 var _nested_editor: NestedObjectEditor = null
 var _color_picker_popup: PopupPanel
 var _color_picker: ColorPicker
 
-# State
+# Состояние
 var _visible_entries: Array[DBEntry] = []
 var _editing_entry: DBEntry = null
 var _editing_field: String = ""
 
 var _column_nav_opt: OptionButton
 
-const COL_ID    = 0   # Always column 0
+const COL_ID    = 0   # Всегда колонка 0
 
-# Button IDs used inside the Tree cells.
+# ID кнопок, используемые внутри ячеек Tree.
 const BTN_VEC2   = 10
 const BTN_VEC3   = 11
 const BTN_RES    = 20
@@ -50,7 +50,7 @@ func _ready() -> void:
 	_build_ui()
 
 func _build_ui() -> void:
-	# ── Toolbar ────────────────────────────────────────────────────────────────
+	# ── Панель инструментов ────────────────────────────────────────────────────
 	_toolbar = HBoxContainer.new()
 	add_child(_toolbar)
 
@@ -130,26 +130,26 @@ func _build_ui() -> void:
 	)
 	col_nav_row.add_child(col_reset_btn)
 
-	# ── Tree ───────────────────────────────────────────────────────────────────
+	# ── Tree (таблица) ──────────────────────────────────────────────────────────
 	_tree = Tree.new()
 	_tree.size_flags_vertical   = Control.SIZE_EXPAND_FILL
 	_tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tree.hide_root = true
 	_tree.select_mode = Tree.SELECT_ROW
 	_tree.allow_rmb_select = true
-	_tree.column_titles_visible = true            # FIX: actually SHOW the column names
-	_tree.set_column_titles_visible(true)         #      (explicit, in case of older 4.x)
+	_tree.column_titles_visible = true            # ИСПРАВЛЕНИЕ: показывать заголовки колонок
+	_tree.set_column_titles_visible(true)         #      (явно, для старых версий 4.x)
 	_tree.item_edited.connect(_on_item_edited)
 	_tree.button_clicked.connect(_on_tree_button_clicked)
 	_tree.column_title_clicked.connect(_on_column_title_clicked)
 	add_child(_tree)
 
-	# ── Status bar ─────────────────────────────────────────────────────────────
+	# ── Строка состояния ────────────────────────────────────────────────────────
 	_status_label = Label.new()
 	_status_label.text = "No table loaded."
 	add_child(_status_label)
 
-	# ── Dialogs ────────────────────────────────────────────────────────────────
+	# ── Диалоги ─────────────────────────────────────────────────────────────────
 	_array_dialog = ArrayEditorDialog.new()
 	_array_dialog.hide()
 	add_child(_array_dialog)
@@ -236,7 +236,7 @@ func clear() -> void:
 	_filter_field_opt.clear()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Tree building
+# Построение таблицы
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _rebuild_filter_options() -> void:
@@ -259,7 +259,7 @@ func _get_visible_entries() -> Array[DBEntry]:
 	else:
 		entries = _table.entries.duplicate()
 
-	# apply field filter
+	# применяем фильтр по полю
 	var fi := _filter_field_opt.selected - 1   # 0 = "(all)"
 	var fv := _filter_val_edit.text.strip_edges()
 	if fi >= 0 and fi < _table.schema.fields.size() and not fv.is_empty():
@@ -285,7 +285,7 @@ func _rebuild_tree() -> void:
 	_tree.columns = n_cols
 	_tree.column_titles_visible = true
 
-	# Column 0 — ID
+	# Колонка 0 — ID
 	var id_title := "ID"
 	if _sort_field == "_id":
 		id_title += " " + ("▲" if _sort_asc else "▼")
@@ -331,7 +331,7 @@ func _populate_row(item: TreeItem, entry: DBEntry,
 				   fields: Array[DBFieldDef], action_col: int) -> void:
 	item.set_metadata(0, entry.entry_id)
 
-	# Column 0 – ID (read-only)
+	# Колонка 0 – ID (только чтение)
 	item.set_text(0, entry.entry_id)
 	item.set_editable(0, false)
 	item.set_selectable(0, true)
@@ -398,7 +398,7 @@ func _populate_row(item: TreeItem, entry: DBEntry,
 					false, "Edit Vector3")
 
 			DBFieldDef.FieldType.COLOR:
-				# FIX: custom cell needs a button to open the picker; make text readable.
+				# ИСПРАВЛЕНИЕ: кастомная ячейка с кнопкой для выбора цвета; текст должен читаться.
 				item.set_cell_mode(col, TreeItem.CELL_MODE_CUSTOM)
 				item.set_editable(col, false)
 				var c: Color = val if val is Color else Color.WHITE
@@ -449,12 +449,12 @@ func _populate_row(item: TreeItem, entry: DBEntry,
 					false, "Edit Dictionary")
 
 
-	# Action buttons in last column
+	# Кнопки действий в последней колонке
 	item.add_button(action_col,
 		get_theme_icon("Remove", "EditorIcons"), BTN_DELETE, false, "Delete row")
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Signal handlers
+# Обработчики сигналов
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _on_item_edited() -> void:
@@ -485,7 +485,7 @@ func _on_item_edited() -> void:
 		DBFieldDef.FieldType.RESOURCE_REF:
 			entry.set_value(f.field_name, item.get_text(col))
 		DBFieldDef.FieldType.COLOR:
-			# handled via the color picker button
+			# обрабатывается через кнопку выбора цвета
 			pass
 
 	data_changed.emit()
@@ -497,7 +497,7 @@ func _on_tree_button_clicked(item: TreeItem, col: int,
 	var entry := _table.get_entry(entry_id)
 	if entry == null: return
 
-	# Delete row button
+	# Кнопка удаления строки
 	if id == BTN_DELETE:
 		_table.remove_entry(entry_id)
 		data_changed.emit()
@@ -524,7 +524,7 @@ func _open_color_picker(entry: DBEntry, f: DBFieldDef,
 	_editing_field = f.field_name
 	var raw: Variant = entry.get_value(f.field_name)
 	_color_picker.color = raw if raw is Color else Color.WHITE
-	# FIX: position using SCREEN coordinates (popup windows are in screen space).
+	# ИСПРАВЛЕНИЕ: позиционирование в экранных координатах (popup-окна работают в screen space).
 	var rect := _tree.get_item_area_rect(item, col)
 	var gpos := _tree.get_screen_position() + rect.position + Vector2(0, rect.size.y)
 	_color_picker_popup.popup(Rect2i(Vector2i(gpos), Vector2i(300, 360)))
@@ -591,7 +591,7 @@ func _on_clear_filter() -> void:
 	_rebuild_tree()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Complex field editors
+# Редакторы сложных полей
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _open_vector2_dialog(entry: DBEntry, f: DBFieldDef) -> void:

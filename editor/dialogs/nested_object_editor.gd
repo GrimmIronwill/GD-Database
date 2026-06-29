@@ -1,32 +1,32 @@
 @tool
 extends Window
 class_name NestedObjectEditor
-## Editor for a nested Dictionary value.
-## Two modes:
-##   • schema mode  – a DBSchema is supplied; fields are fixed.
-##   • free mode    – no schema; user adds/removes arbitrary typed keys.
+## Редактор вложенного Dictionary.
+## Два режима:
+##   • schema mode  – предоставлена DBSchema; поля фиксированы.
+##   • free mode    – без схемы; пользователь добавляет/удаляет произвольные типизированные ключи.
 
 signal object_confirmed(result: Dictionary)
 
-# ── Data ──────────────────────────────────────────────────────────────────────
+# ── Данные ────────────────────────────────────────────────────────────────────
 var _schema: DBSchema = null
 var _free_mode: bool = false
-var _database: DBDatabase = null   # FIX: нужен, чтобы резолвить вложенные схемы по имени
+var _database: DBDatabase = null   # ИСПРАВЛЕНИЕ: нужен, чтобы резолвить вложенные схемы по имени
 
-# Schema mode: working values keyed by field name.
+# Режим схемы: текущие значения, ключи — имена полей.
 var _data: Dictionary = {}
 
-# Free mode: list of slots. Each slot = { id, name, type, value, elem_type }.
+# Свободный режим: список слотов. Каждый слот = { id, name, type, value, elem_type }.
 var _slots: Array = []
 var _next_id: int = 0
 
-# ── UI ────────────────────────────────────────────────────────────────────────
+# ── Интерфейс ─────────────────────────────────────────────────────────────────
 var _scroll: ScrollContainer
 var _fields_vbox: VBoxContainer
 
 var _open_dialogs: Dictionary = {}
 
-# Free-mode type palette (ENUM intentionally excluded – needs schema metadata).
+# Палитра типов для free-mode (ENUM намеренно исключён — нужны метаданные схемы).
 const FREE_TYPES := [
 	"int", "float", "string", "bool",
 	"Vector2", "Vector3", "Color",
@@ -96,10 +96,10 @@ func _build_ui() -> void:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Public API
+# Публичный API
 # ──────────────────────────────────────────────────────────────────────────────
 
-## FIX: добавлен параметр db, чтобы вложенные уровни могли резолвить схемы.
+## ИСПРАВЛЕНИЕ: добавлен параметр db, чтобы вложенные уровни могли резолвить схемы.
 func open(data: Dictionary, schema: DBSchema = null, db: DBDatabase = null) -> void:
 	_schema = schema
 	_database = db
@@ -133,7 +133,7 @@ func open(data: Dictionary, schema: DBSchema = null, db: DBDatabase = null) -> v
 	popup_centered()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Row construction
+# Построение строк
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _clear_rows() -> void:
@@ -217,7 +217,7 @@ func _add_free_row(slot: Dictionary) -> void:
 	_fields_vbox.add_child(hbox)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Unified value-editor builder (used by both modes)
+# Универсальный построитель редактора значений (используется в обоих режимах)
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _build_value_editor(dlg_key: String, type: int, value: Variant,
@@ -319,7 +319,7 @@ func _build_value_editor(dlg_key: String, type: int, value: Variant,
 			btn.pressed.connect(func() -> void:
 				var cur: Variant = getter.call()
 				var a: Array = cur if cur is Array else []
-				# FIX: пробрасываем field_def → массив сохраняет nested_schema_name/enum.
+				# ИСПРАВЛЕНИЕ: пробрасываем field_def → массив сохраняет nested_schema_name/enum.
 				_open_array(dlg_key, btn, a, int(elem_get.call()), field_def, setter, elem_set)
 			)
 			return btn
@@ -331,13 +331,13 @@ func _build_value_editor(dlg_key: String, type: int, value: Variant,
 			btn.pressed.connect(func() -> void:
 				var cur: Variant = getter.call()
 				var d: Dictionary = cur if cur is Dictionary else {}
-				# FIX: резолвим дочернюю схему по nested_schema_name (рекурсивная вложенность).
+				# ИСПРАВЛЕНИЕ: резолвим дочернюю схему по nested_schema_name (рекурсивная вложенность).
 				_open_nested(dlg_key, btn, d, _resolve_nested_schema(field_def), setter)
 			)
 			return btn
 
 		DBFieldDef.FieldType.DICTIONARY:
-			# FIX: раньше этой ветки не было → словарь падал в _: и рисовался строкой.
+			# ИСПРАВЛЕНИЕ: раньше этой ветки не было → словарь падал в _: и рисовался строкой.
 			var dd0: Dictionary = value if value is Dictionary else {}
 			var btn := Button.new()
 			btn.text = "{Dict: %d}" % dd0.size()
@@ -355,7 +355,7 @@ func _build_value_editor(dlg_key: String, type: int, value: Variant,
 			return le
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Complex-type dialogs (all write through `setter`)
+# Диалоги сложных типов (все записывают через `setter`)
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _open_resource_browser(dlg_key: String, le: LineEdit,
@@ -458,7 +458,7 @@ func _open_vector3(dlg_key: String, btn: Button, val: Vector3, setter: Callable)
 		dlg.queue_free()
 	)
 
-## FIX: добавлен параметр field_def, чтобы дочерний массив сохранял метаданные
+## ИСПРАВЛЕНИЕ: добавлен параметр field_def, чтобы дочерний массив сохранял метаданные
 ## (enum/nested_schema_name/dict-типы) и базу данных.
 func _open_array(dlg_key: String, btn: Button, arr: Array, elem_type: int,
 		field_def: DBFieldDef, setter: Callable, elem_set: Callable) -> void:
@@ -522,7 +522,7 @@ func _pick_array_elem_type(dlg_key: String, on_pick: Callable) -> void:
 		dlg.queue_free()
 	)
 
-## FIX: добавлен параметр sub_schema + проброс _database (рекурсивная вложенность).
+## ИСПРАВЛЕНИЕ: добавлен параметр sub_schema + проброс _database (рекурсивная вложенность).
 func _open_nested(dlg_key: String, btn: Button, obj: Dictionary,
 		sub_schema: DBSchema, setter: Callable) -> void:
 	_close_dialog(dlg_key)
@@ -541,7 +541,7 @@ func _open_nested(dlg_key: String, btn: Button, obj: Dictionary,
 	)
 	ed.open(obj, sub_schema, _database)
 
-## FIX (новый): открывает настоящий редактор словаря вместо строки.
+## ИСПРАВЛЕНИЕ (новое): открывает настоящий редактор словаря вместо строки.
 func _open_dict(dlg_key: String, btn: Button, d: Dictionary,
 		field_def: DBFieldDef, setter: Callable) -> void:
 	_close_dialog(dlg_key)
@@ -567,14 +567,14 @@ func _open_dict(dlg_key: String, btn: Button, d: Dictionary,
 	)
 	ed.open(d, fd, _database)
 
-## FIX (новый): резолвит дочернюю схему по nested_schema_name через базу.
+## ИСПРАВЛЕНИЕ (новое): резолвит дочернюю схему по nested_schema_name через базу.
 func _resolve_nested_schema(field_def: DBFieldDef) -> DBSchema:
 	if _database and field_def and not field_def.nested_schema_name.is_empty():
 		return _database.get_schema_by_name_or_table(field_def.nested_schema_name)
 	return null
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Free-mode field management
+# Управление полями в free-mode
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _on_add_free_field() -> void:
@@ -620,7 +620,7 @@ func _unique_default_name() -> String:
 	return "field_%d" % i
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Dialog lifecycle
+# Жизненный цикл диалогов
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _close_dialog(dlg_key: String) -> void:
@@ -638,7 +638,7 @@ func _close_all_dialogs() -> void:
 	_open_dialogs.clear()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# OK / Cancel
+# OK / Отмена
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _on_ok() -> void:
@@ -664,7 +664,7 @@ func _on_close_requested() -> void:
 	hide()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Helpers
+# Вспомогательные функции
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _free_type_index(field_type: int) -> int:

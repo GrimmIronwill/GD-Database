@@ -1,9 +1,9 @@
 @tool
 extends Window
 class_name ArrayEditorDialog
-## Type-aware editor for a homogeneous Array value.
-## The element editor adapts to `field.array_element_type`, and selected
-## elements can be edited in place via the "Update" button.
+## Редактор однородного массива с учётом типа элементов.
+## Редактор элемента подстраивается под `field.array_element_type`,
+## выбранные элементы можно изменять кнопкой «Update».
 
 signal confirmed_array(result: Array)
 
@@ -12,17 +12,17 @@ var _array_data: Array = []
 var _selected_idx: int = -1
 var _ui_built: bool = false
 
-# Current value held by the inline editor (kept in sync with the widgets).
+# Текущее значение во встроенном редакторе (синхронизируется с виджетами).
 var _current_value: Variant = null
 var _color_value: Color = Color.WHITE
 var _database: DBDatabase = null
 
-# ── UI ────────────────────────────────────────────────────────────────────────
+# ── Интерфейс ─────────────────────────────────────────────────────────────────
 var _item_list: ItemList
 var _type_label: Label
 var _editor_host: HBoxContainer
 
-# Editor widgets (only the ones relevant to the element type are created).
+# Виджеты редактора (создаются только соответствующие типу элемента).
 var _line: LineEdit = null
 var _num_spin: SpinBox = null
 var _check: CheckBox = null
@@ -39,7 +39,7 @@ var _up_btn: Button
 var _dn_btn: Button
 var _complex_btn: Button = null   # dict / nested object / array элемент
 
-# Child dialogs (color picker / file browser) – tracked to avoid leaks.
+# Дочерние диалоги (выбор цвета / файлов) — отслеживаются для избежания утечек.
 var _child_dialog: Window = null
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ func _build_ui() -> void:
 
 	vbox.add_child(HSeparator.new())
 
-	# Dynamic value editor lives in this host (rebuilt per element type).
+	# Динамический редактор значения находится в этом контейнере (перестраивается по типу).
 	var edit_lbl := Label.new()
 	edit_lbl.text = "Value:"
 	vbox.add_child(edit_lbl)
@@ -95,7 +95,7 @@ func _build_ui() -> void:
 	_editor_host.add_theme_constant_override("separation", 4)
 	vbox.add_child(_editor_host)
 
-	# Add / Update / Remove row.
+	# Добавить / Обновить / Удалить строку.
 	var act_row := HBoxContainer.new()
 	vbox.add_child(act_row)
 	_add_btn = Button.new(); _add_btn.text = "+ Add"
@@ -110,7 +110,7 @@ func _build_ui() -> void:
 	_remove_btn.pressed.connect(_on_remove)
 	act_row.add_child(_remove_btn)
 
-	# Reorder row.
+	# Перемещение строк.
 	var order_row := HBoxContainer.new()
 	vbox.add_child(order_row)
 	_up_btn = Button.new(); _up_btn.text = "▲ Up"
@@ -125,7 +125,7 @@ func _build_ui() -> void:
 
 	vbox.add_child(HSeparator.new())
 
-	# OK / Cancel.
+	# OK / Отмена.
 	var btn_row := HBoxContainer.new()
 	vbox.add_child(btn_row)
 	var sp2 := Control.new(); sp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -138,7 +138,7 @@ func _build_ui() -> void:
 	btn_row.add_child(ok_btn)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Public API
+# Публичный API
 # ──────────────────────────────────────────────────────────────────────────────
 
 func open(array: Array, field: DBFieldDef, db: DBDatabase = null) -> void:
@@ -162,7 +162,7 @@ func open(array: Array, field: DBFieldDef, db: DBDatabase = null) -> void:
 	popup_centered(Vector2i(480, 600))
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Element type helpers
+# Помощники типа элемента
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _element_type() -> int:
@@ -176,7 +176,7 @@ func _element_type_label() -> String:
 	tmp.resource_type_hint = _field_def.resource_type_hint
 	return tmp.get_type_label()
 
-## A temp field def describing a single element – reused for coercion.
+## Временное определение поля для одного элемента — переиспользуется для приведения типов.
 func _make_elem_field() -> DBFieldDef:
 	var fd := DBFieldDef.new()
 	fd.field_type = _element_type()
@@ -215,7 +215,7 @@ func _format_elem(v: Variant) -> String:
 			return DBFieldDef.format_value_for_display(v)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Dynamic value editor
+# Динамический редактор значения
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _rebuild_value_editor() -> void:
@@ -325,7 +325,7 @@ func _rebuild_value_editor() -> void:
 			_editor_host.add_child(_line)
 
 
-## Push `_current_value` into the editor widgets.
+## Записывает `_current_value` в виджеты редактора.
 func _write_editor(v: Variant) -> void:
 	_current_value = _coerce_elem(v)
 	match _element_type():
@@ -372,7 +372,7 @@ func _update_vector() -> void:
 		_current_value = Vector2(_vx.value, _vy.value)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# List handling
+# Работа со списком
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _refresh_list() -> void:
@@ -418,7 +418,7 @@ func _move(delta: int) -> void:
 	_refresh_list()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Complex element pickers
+# Редакторы сложных элементов
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _on_edit_dict_element() -> void:
@@ -514,7 +514,7 @@ func _close_child_dialog() -> void:
 	_child_dialog = null
 
 # ──────────────────────────────────────────────────────────────────────────────
-# OK / Cancel
+# OK / Отмена
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _on_ok() -> void:
@@ -527,7 +527,7 @@ func _on_cancel() -> void:
 	hide()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Small UI helpers
+# Вспомогательные элементы UI
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _make_spin(step: float, allow_float: bool) -> SpinBox:

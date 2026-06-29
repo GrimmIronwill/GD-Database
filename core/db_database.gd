@@ -4,7 +4,7 @@ extends Resource
 
 @export var database_name: String = "MyDatabase"
 @export var version: String = "1.0.0"
-## table_name (String) → DBTable
+## имя_таблицы (String) → DBTable
 @export var tables: Dictionary = {}
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ func get_table_names() -> PackedStringArray:
 		out.append(k)
 	return out
 
-## Export the entire database to a nested Dictionary for JSON serialisation.
+## Экспортирует всю базу во вложенный Dictionary для JSON-сериализации.
 func to_json_dict() -> Dictionary:
 	var out: Dictionary = {
 		"database_name": database_name,
@@ -102,7 +102,7 @@ func resolve_enum_refs() -> void:
 				else:
 					push_warning("[GD Database] enum_ref '%s' не найден (поле %s)." % [f.enum_ref, f.field_name])
 
-			# FIX: enum-КЛЮЧ словаря по ссылке (Dictionary или Array<Dictionary>).
+			# ИСПРАВЛЕНИЕ: enum-КЛЮЧ словаря по ссылке (Dictionary или Array<Dictionary>).
 			var dict_like := f.field_type == DBFieldDef.FieldType.DICTIONARY \
 				or (f.field_type == DBFieldDef.FieldType.ARRAY \
 					and f.array_element_type == DBFieldDef.FieldType.DICTIONARY)

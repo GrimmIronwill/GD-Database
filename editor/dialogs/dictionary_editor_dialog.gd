@@ -1,7 +1,7 @@
 @tool
 extends Window
 class_name DictionaryEditorDialog
-## Type-aware editor for a Dictionary value (key → value map).
+## Редактор Dictionary с учётом типов (отображение ключ → значение).
 ##   key   ← field.dict_key_type   (+ dict_key_enum_values для enum-ключей)
 ##   value ← field.dict_value_type (+ enum_values / array_element_type / nested_schema_name)
 
@@ -27,13 +27,13 @@ var _add_btn: Button
 var _update_btn: Button
 var _remove_btn: Button
 
-# key widgets
+# виджеты ключа
 var _k_line: LineEdit = null
 var _k_spin: SpinBox = null
 var _k_check: CheckBox = null
 var _k_enum: OptionButton = null
 
-# value widgets
+# виджеты значения
 var _v_line: LineEdit = null
 var _v_spin: SpinBox = null
 var _v_check: CheckBox = null
@@ -130,7 +130,7 @@ func _build_ui() -> void:
 	btn_row.add_child(ok_btn)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Public API
+# Публичный API
 # ──────────────────────────────────────────────────────────────────────────────
 
 func open(d: Dictionary, field: DBFieldDef, db: DBDatabase = null) -> void:
@@ -154,7 +154,7 @@ func open(d: Dictionary, field: DBFieldDef, db: DBDatabase = null) -> void:
 	popup_centered()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Type helpers
+# Помощники типов
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _key_type() -> int:
@@ -209,7 +209,7 @@ func _format_value(v: Variant) -> String:
 			return DBFieldDef.format_value_for_display(v)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Key editor
+# Редактор ключа
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _rebuild_key_editor() -> void:
@@ -282,7 +282,7 @@ func _write_key_editor(v: Variant) -> void:
 				_k_line.text = str(_current_key)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Value editor
+# Редактор значения
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _rebuild_value_editor() -> void:
@@ -412,7 +412,7 @@ func _update_vector() -> void:
 		_current_value = Vector2(_v_vx.value, _v_vy.value)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# List handling
+# Работа со списком
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _refresh_list() -> void:
@@ -456,7 +456,7 @@ func _on_remove() -> void:
 	_refresh_list()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Complex value pickers
+# Редакторы сложных значений
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _on_pick_color() -> void:
@@ -567,7 +567,7 @@ func _close_child_dialog() -> void:
 	_child_dialog = null
 
 # ──────────────────────────────────────────────────────────────────────────────
-# OK / Cancel
+# OK / Отмена
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _on_ok() -> void:
@@ -580,7 +580,7 @@ func _on_cancel() -> void:
 	hide()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Small UI helpers
+# Вспомогательные элементы UI
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _make_spin(step: float, allow_float: bool) -> SpinBox:

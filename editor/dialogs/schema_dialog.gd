@@ -1,7 +1,7 @@
 @tool
 extends Window
 class_name SchemaDialog
-## Creates a new schema (table) or edits an existing one.
+## Создаёт новую схему (таблицу) или редактирует существующую.
 
 const FieldDialog = preload("res://addons/gd_database/editor/dialogs/field_dialog.gd")
 
@@ -42,7 +42,7 @@ func _build_ui() -> void:
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.add_child(vbox)
 
-	# ── Meta ───────────────────────────────────────────────────────────────────
+	# ── Мета-данные ─────────────────────────────────────────────────────────────
 	var meta_grid := GridContainer.new()
 	meta_grid.columns = 2
 	vbox.add_child(meta_grid)
@@ -91,7 +91,7 @@ func _build_ui() -> void:
 	_field_list.item_activated.connect(func(_i): _on_edit_field())
 	vbox.add_child(_field_list)
 
-	# ── Bottom buttons ─────────────────────────────────────────────────────────
+	# ── Нижние кнопки ───────────────────────────────────────────────────────────
 	var btn_row := HBoxContainer.new()
 	vbox.add_child(btn_row)
 	var spacer := Control.new()
@@ -106,7 +106,7 @@ func _build_ui() -> void:
 	ok_btn.pressed.connect(_on_ok)
 	btn_row.add_child(ok_btn)
 
-	# ── Field dialog ───────────────────────────────────────────────────────────
+	# ── Диалог поля ─────────────────────────────────────────────────────────────
 	_field_dialog = FieldDialog.new()
 	_field_dialog.hide()
 	add_child(_field_dialog)

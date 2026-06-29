@@ -1,7 +1,7 @@
 @tool
 extends PanelContainer
 class_name DatabaseEditor
-## Root panel added to the Godot bottom dock.
+## Корневая панель, добавляемая в нижний док редактора Godot.
 
 var _plugin: EditorPlugin = null
 var _database: DBDatabase = null
@@ -37,7 +37,7 @@ func _build_ui() -> void:
 	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(vbox)
 
-	# ── Top bar ────────────────────────────────────────────────────────────────
+	# ── Верхняя панель ──────────────────────────────────────────────────────────
 	_top_bar = HBoxContainer.new()
 	_top_bar.add_theme_constant_override("separation", 6)
 	vbox.add_child(_top_bar)
@@ -82,7 +82,7 @@ func _build_ui() -> void:
 	var sep := HSeparator.new()
 	vbox.add_child(sep)
 
-	# ── Main split ─────────────────────────────────────────────────────────────
+	# ── Основной сплиттер ───────────────────────────────────────────────────────
 	_split = HSplitContainer.new()
 	_split.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_split.split_offset = 220
@@ -101,13 +101,13 @@ func _build_ui() -> void:
 	_entry_view.data_changed.connect(_on_data_changed)
 	_split.add_child(_entry_view)
 
-	# ── Import/Export dialog ───────────────────────────────────────────────────
+	# ── Диалог импорта/экспорта ─────────────────────────────────────────────────
 	_import_export_dialog = ImportExportDlg.new()
 	_import_export_dialog.hide()
 	add_child(_import_export_dialog)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Public API
+# Публичный API
 # ──────────────────────────────────────────────────────────────────────────────
 
 func load_database(db: DBDatabase) -> void:
@@ -140,7 +140,7 @@ func save_current_database() -> void:
 		print("[GD Database] Saved → %s" % path)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Callbacks
+# Обратные вызовы
 # ──────────────────────────────────────────────────────────────────────────────
 
 func _on_new_db() -> void:

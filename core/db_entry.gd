@@ -4,7 +4,7 @@ extends Resource
 
 @export var entry_id: String = ""
 @export var schema_name: String = ""
-## All field values are stored here; keys = field names.
+## Все значения полей хранятся здесь; ключи = имена полей.
 @export var data: Dictionary = {}
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ func has_value(field_name: String) -> bool:
 	return data.has(field_name)
 
 func to_plain_dict() -> Dictionary:
-	## Returns a deep copy suitable for JSON export.
+	## Возвращает глубокую копию, подходящую для экспорта в JSON.
 	var out: Dictionary = { "_id": entry_id, "_schema": schema_name }
 	for key in data:
 		var v: Variant = data[key]

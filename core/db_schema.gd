@@ -46,9 +46,9 @@ func get_field_names() -> PackedStringArray:
 		out.append(f.field_name)
 	return out
 
-## Build a fresh data Dictionary with all default values.
-## If db is passed, NESTED_OBJECT fields with nested_schema_name are expanded
-## using the referenced schema defaults.
+## Создаёт свежий Dictionary данных со всеми значениями по умолчанию.
+## Если передан db, поля NESTED_OBJECT с nested_schema_name разворачиваются
+## с использованием дефолтов указанной схемы.
 func make_default_data(db = null, _depth: int = 8) -> Dictionary:
 	var d: Dictionary = {}
 	for f: DBFieldDef in fields:
@@ -56,7 +56,7 @@ func make_default_data(db = null, _depth: int = 8) -> Dictionary:
 	return d
 
 
-## Ensure an existing data dict has all schema keys; add missing, keep extra.
+## Дополняет существующий dict ключами схемы; добавляет недостающие, сохраняет лишние.
 func normalize_data(data: Dictionary, db = null, _depth: int = 8) -> Dictionary:
 	for f: DBFieldDef in fields:
 		if not data.has(f.field_name):

@@ -1,7 +1,7 @@
 @tool
 extends Window
 class_name ImportExportDlg
-## JSON import/export for the whole database or individual tables.
+## JSON-импорт/экспорт для всей базы или отдельных таблиц.
 
 var _database: DBDatabase = null
 var _text_edit: TextEdit
@@ -84,7 +84,7 @@ func open(db: DBDatabase) -> void:
 	_status_label.text = ""
 	popup_centered()
 
-# ── Export ────────────────────────────────────────────────────────────────────
+# ── Экспорт ───────────────────────────────────────────────────────────────────
 
 func _on_export() -> void:
 	if _database == null: return
@@ -148,7 +148,7 @@ func _csv_cell(v: Variant) -> String:
 	if v is Array:   return "[%d items]" % (v as Array).size()
 	return str(v)
 
-# ── Import ────────────────────────────────────────────────────────────────────
+# ── Импорт ────────────────────────────────────────────────────────────────────
 
 func _on_import() -> void:
 	if _database == null: return
@@ -167,10 +167,10 @@ func _on_import() -> void:
 		return
 	var d: Dictionary = data as Dictionary
 
-	# Single table export format
+	# Формат экспорта одной таблицы
 	if d.has("entries") and d.has("table"):
 		_import_table_json(d)
-	# Full database export
+	# Экспорт всей базы
 	elif d.has("tables"):
 		for tname: String in d["tables"]:
 			_import_table_json(d["tables"][tname], tname)
@@ -198,7 +198,7 @@ func _import_table_json(td: Dictionary, override_name: String = "") -> void:
 			t.entries.append(e)
 	t.emit_changed()
 
-# ── File I/O ──────────────────────────────────────────────────────────────────
+# ── Файловый ввод/вывод ───────────────────────────────────────────────────────
 
 func _on_save_file() -> void:
 	var dlg := EditorFileDialog.new()

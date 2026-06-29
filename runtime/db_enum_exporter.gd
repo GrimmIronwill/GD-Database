@@ -62,7 +62,7 @@ static func export_to_file(db: DBDatabase, path: String, class_name_str := "Game
 	f.close()
 	return OK
 
-# ── internals ─────────────────────────────────────────────────────────────────
+# ── Внутреннее ────────────────────────────────────────────────────────────────
 
 static func _collect(db: DBDatabase, enum_refs: PackedStringArray = PackedStringArray()) -> Dictionary:
 	var out := {}   # enum_name -> PackedStringArray
