@@ -63,15 +63,37 @@ func _ready() -> void:
 	_schema_dialog.hide()
 	add_child(_schema_dialog)
 
-func refresh(db: DBDatabase) -> void:
+func refresh(db: DBDatabase, keep_selected: String = "") -> void:
 	_database = db
+
+	var selected_name := keep_selected
+
+	# Если явно не передали имя — попробуем сохранить текущее выделение.
+	if selected_name.is_empty() and _item_list != null:
+		var idxs := _item_list.get_selected_items()
+		if not idxs.is_empty():
+			selected_name = str(_item_list.get_item_metadata(idxs[0]))
+
 	_item_list.clear()
-	if db == null: return
+
+	if db == null:
+		return
+
+	var selected_idx := -1
+
 	for name: String in db.get_table_names():
 		var t := db.get_table(name)
 		var count := t.entries.size() if t else 0
+
 		_item_list.add_item("%s  (%d)" % [name, count])
-		_item_list.set_item_metadata(_item_list.item_count - 1, name)
+		var idx := _item_list.item_count - 1
+		_item_list.set_item_metadata(idx, name)
+
+		if name == selected_name:
+			selected_idx = idx
+
+	if selected_idx >= 0:
+		_item_list.select(selected_idx)
 
 func _on_item_selected(idx: int) -> void:
 	var name: String = _item_list.get_item_metadata(idx)

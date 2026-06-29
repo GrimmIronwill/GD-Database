@@ -20,6 +20,8 @@ var _open_db_btn: Button
 var _io_btn: Button
 var _gen_enums_btn: Button
 
+var _current_table_name: String = ""
+
 # ──────────────────────────────────────────────────────────────────────────────
 
 func set_plugin(p: EditorPlugin) -> void:
@@ -112,12 +114,16 @@ func load_database(db: DBDatabase) -> void:
 	_database = db
 	_database.resolve_enum_refs()
 	_db_path  = db.resource_path
+	_current_table_name = ""
+
 	_db_name_label.text = "DB: %s  [%s]" % [db.database_name, _db_path.get_file()]
 	_save_btn.disabled = false
 	_io_btn.disabled   = false
 	_gen_enums_btn.disabled = false
+
 	if _table_list:
 		_table_list.refresh(_database)
+
 	_entry_view.clear()
 
 func save_current_database() -> void:
@@ -193,26 +199,44 @@ func _show_save_dialog() -> void:
 	)
 
 func _on_table_selected(table_name: String) -> void:
-	if _database == null: return
+	if _database == null:
+		return
+
+	_current_table_name = table_name
+
 	_database.resolve_enum_refs()
 	var t := _database.get_table(table_name)
 	if t:
 		_entry_view.load_table(t, _database)
 
 func _on_table_renamed(old_name: String, new_name: String) -> void:
-	if _database == null: return
-	_database.rename_table(old_name, new_name)
-	_table_list.refresh(_database)
+	if _database == null:
+		return
+
+	if _database.rename_table(old_name, new_name):
+		if _current_table_name == old_name:
+			_current_table_name = new_name
+
+	_table_list.refresh(_database, _current_table_name)
 
 func _on_table_deleted(table_name: String) -> void:
-	if _database == null: return
+	if _database == null:
+		return
+
 	_database.remove_table(table_name)
+
+	if _current_table_name == table_name:
+		_current_table_name = ""
+
 	_entry_view.clear()
 	_table_list.refresh(_database)
 
 func _on_data_changed() -> void:
 	if _database:
 		_database.emit_changed()
+
+	if _table_list:
+		_table_list.refresh(_database, _current_table_name)
 
 func _on_import_export() -> void:
 	if _database:

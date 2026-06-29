@@ -47,15 +47,62 @@ func get_field_names() -> PackedStringArray:
 	return out
 
 ## Build a fresh data Dictionary with all default values.
-func make_default_data() -> Dictionary:
+## If db is passed, NESTED_OBJECT fields with nested_schema_name are expanded
+## using the referenced schema defaults.
+func make_default_data(db = null, _depth: int = 8) -> Dictionary:
 	var d: Dictionary = {}
 	for f: DBFieldDef in fields:
-		d[f.field_name] = f.get_default()
+		d[f.field_name] = _make_field_default(f, db, _depth)
 	return d
 
+
 ## Ensure an existing data dict has all schema keys; add missing, keep extra.
-func normalize_data(data: Dictionary) -> Dictionary:
+func normalize_data(data: Dictionary, db = null, _depth: int = 8) -> Dictionary:
 	for f: DBFieldDef in fields:
 		if not data.has(f.field_name):
-			data[f.field_name] = f.get_default()
+			data[f.field_name] = _make_field_default(f, db, _depth)
 	return data
+
+
+func _make_field_default(f: DBFieldDef, db = null, _depth: int = 8) -> Variant:
+	if f == null:
+		return null
+
+	f.sanitize()
+
+	# Если пользователь явно задал default_value — используем его.
+	if f.default_value != null:
+		var explicit: Variant = f.coerce(f.default_value)
+
+		# Если это вложенный объект и default_value — Dictionary,
+		# можно дополнить отсутствующие поля дефолтами вложенной схемы.
+		if f.field_type == DBFieldDef.FieldType.NESTED_OBJECT \
+				and explicit is Dictionary \
+				and db != null \
+				and _depth > 0 \
+				and not f.nested_schema_name.is_empty():
+
+			var nested_schema: DBSchema = db.get_schema_by_name_or_table(f.nested_schema_name)
+			if nested_schema != null:
+				var nested_data: Dictionary = explicit.duplicate(true)
+				return nested_schema.normalize_data(nested_data, db, _depth - 1)
+
+		return _dup_default(explicit)
+
+	# Главное исправление: дефолт для NESTED_OBJECT берём из связанной схемы.
+	if f.field_type == DBFieldDef.FieldType.NESTED_OBJECT \
+			and db != null \
+			and _depth > 0 \
+			and not f.nested_schema_name.is_empty():
+
+		var nested_schema: DBSchema = db.get_schema_by_name_or_table(f.nested_schema_name)
+		if nested_schema != null:
+			return nested_schema.make_default_data(db, _depth - 1)
+
+	return _dup_default(f.get_default())
+
+
+func _dup_default(v: Variant) -> Variant:
+	if v is Array or v is Dictionary:
+		return v.duplicate(true)
+	return v

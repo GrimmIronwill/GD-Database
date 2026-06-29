@@ -1,20 +1,16 @@
 @tool
 class_name DBTable
 extends Resource
-
 @export var table_name: String = "Table"
 @export var schema: DBSchema = null
 @export var entries: Array[DBEntry] = []
-
 var _id_counter: int = 0
-
 # ──────────────────────────────────────────────────────────────────────────────
-
-func add_entry() -> DBEntry:
+func add_entry(db = null) -> DBEntry:
 	var e := DBEntry.new()
 	e.entry_id    = _new_id()
 	e.schema_name = schema.schema_name if schema else ""
-	e.data        = schema.make_default_data() if schema else {}
+	e.data        = schema.make_default_data(db) if schema else {}
 	entries.append(e)
 	emit_changed()
 	return e
@@ -50,7 +46,7 @@ func get_entry_index(entry_id: String) -> int:
 			return i
 	return -1
 
-## Move a row up or down.
+## Перемещает строку вверх или вниз.
 func move_entry(entry_id: String, delta: int) -> void:
 	var i := get_entry_index(entry_id)
 	if i < 0: return
@@ -61,7 +57,7 @@ func move_entry(entry_id: String, delta: int) -> void:
 	entries.insert(j, e)
 	emit_changed()
 
-## Returns entries matching a simple text query across all string-convertible fields.
+## Возвращает записи, соответствующие простому текстовому запросу по всем полям, приводимым к строке.
 func search(query: String) -> Array[DBEntry]:
 	if query.strip_edges().is_empty():
 		return entries.duplicate()
@@ -74,7 +70,7 @@ func search(query: String) -> Array[DBEntry]:
 				break
 	return out
 
-## Returns entries where field == value (exact match).
+## Возвращает записи, где поле == значение (точное совпадение).
 func filter(field_name: String, value: Variant) -> Array[DBEntry]:
 	var out: Array[DBEntry] = []
 	for e: DBEntry in entries:
@@ -82,7 +78,7 @@ func filter(field_name: String, value: Variant) -> Array[DBEntry]:
 			out.append(e)
 	return out
 
-## Returns a sorted copy of the entries array.
+## Возвращает отсортированную копию массива записей.
 func sorted_by(field_name: String, ascending: bool = true) -> Array[DBEntry]:
 	var copy: Array[DBEntry] = entries.duplicate()
 	if field_name == "_id":
@@ -103,7 +99,7 @@ func sorted_by(field_name: String, ascending: bool = true) -> Array[DBEntry]:
 		)
 	return copy
 
-# FIX: guarantee uniqueness so reload/import can't collide with existing IDs.
+# ИСПРАВЛЕНИЕ: гарантирует уникальность, чтобы перезагрузка/импорт не вызывали конфликтов с существующими ID.
 func _new_id() -> String:
 	var prefix := table_name.to_lower().replace(" ", "_")
 	_id_counter += 1

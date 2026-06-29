@@ -212,6 +212,15 @@ func _on_column_nav_selected(idx: int) -> void:
 func load_table(table: DBTable, db: DBDatabase) -> void:
 	_table    = table
 	_database = db
+
+	if _database:
+		_database.resolve_enum_refs()
+
+	if _table != null and _table.schema != null:
+		for e: DBEntry in _table.entries:
+			e.schema_name = _table.schema.schema_name
+			_table.schema.normalize_data(e.data, _database)
+
 	_sort_field = ""
 	_sort_asc   = true
 	_search_edit.text = ""
@@ -554,7 +563,7 @@ func _on_column_title_clicked(col: int, _mouse_btn: int) -> void:
 
 func _on_add_row() -> void:
 	if _table == null: return
-	_table.add_entry()
+	_table.add_entry(_database)
 	data_changed.emit()
 	_rebuild_tree()
 

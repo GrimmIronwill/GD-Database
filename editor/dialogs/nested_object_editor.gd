@@ -570,9 +570,7 @@ func _open_dict(dlg_key: String, btn: Button, d: Dictionary,
 ## FIX (новый): резолвит дочернюю схему по nested_schema_name через базу.
 func _resolve_nested_schema(field_def: DBFieldDef) -> DBSchema:
 	if _database and field_def and not field_def.nested_schema_name.is_empty():
-		var t := _database.get_table(field_def.nested_schema_name)
-		if t:
-			return t.schema
+		return _database.get_schema_by_name_or_table(field_def.nested_schema_name)
 	return null
 
 # ──────────────────────────────────────────────────────────────────────────────

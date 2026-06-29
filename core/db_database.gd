@@ -112,3 +112,20 @@ func resolve_enum_refs() -> void:
 					f.dict_key_enum_values = sources[f.dict_key_enum_ref]
 				else:
 					push_warning("[GD Database] dict_key_enum_ref '%s' не найден (поле %s)." % [f.dict_key_enum_ref, f.field_name])
+
+func get_schema_by_name_or_table(name: String) -> DBSchema:
+	if name.is_empty():
+		return null
+
+	# Сначала пробуем как имя таблицы.
+	var t := get_table(name)
+	if t != null and t.schema != null:
+		return t.schema
+
+	# Потом пробуем как schema_name.
+	for tname: String in tables:
+		var table: DBTable = tables[tname]
+		if table != null and table.schema != null and table.schema.schema_name == name:
+			return table.schema
+
+	return null
